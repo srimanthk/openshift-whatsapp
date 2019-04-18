@@ -1,0 +1,127 @@
+version: '3'
+
+volumes:
+  whatsappmediamulticonnect:
+    driver: local
+
+services:
+  wawebmulticonnect:
+    image: docker.whatsapp.biz/web:v${WA_API_VERSION:-2.21.6}
+    restart: always
+    command: ["/opt/whatsapp/bin/wait_on_mysql.sh", "/opt/whatsapp/bin/launch_within_docker.sh"]
+    ports:
+      - ${EXTERNAL_WEBAPP_PORT:-9090}:443
+    volumes:
+      - whatsappmediamulticonnect:/usr/local/wamedia
+    env_file:
+      - db.env
+    environment:
+      WA_APP_MULTICONNECT: "1"
+      # Needs to reflect port exposed above
+      WEBAPP_EXTERNAL_PORTS: "9090"
+      # $EXTERNAL_HOSTNAME should reflect the current machine's hostname
+      # accessible to other containers
+      WEBAPP_HOSTNAME: "waweb-multiconnect"
+      # this is the version of the docker templates being used to run WhatsApp Business API
+      WA_RUNNING_ENV_VERSION: v2.2.2
+      ORCHESTRATION: DOCKER-COMPOSE
+  wacoremulticonnect1:
+    image: docker.whatsapp.biz/coreapp:v${WA_API_VERSION:-2.21.6}
+    restart: always
+    command: ["/opt/whatsapp/bin/wait_on_mysql.sh", "/opt/whatsapp/bin/launch_within_docker.sh"]
+    ports:
+      - "6250:6250"
+      - "6251:6251"
+      - "6252:6252"
+      - "6253:6253"
+    volumes:
+      - whatsappmediamulticonnect:/usr/local/wamedia
+    env_file:
+      - db.env
+    environment:
+      WA_APP_MULTICONNECT: "1"
+      # Needs to reflect ports exposed above
+      COREAPP_EXTERNAL_PORTS: "6250,6251,6252,6253"
+      # $EXTERNAL_HOSTNAME should reflect the current machine's hostname
+      # accessible to other containers
+      COREAPP_HOSTNAME: "wacore-multiconnect-1"
+      # This is the version of the docker templates being used to run WhatsApp Business API
+      WA_RUNNING_ENV_VERSION: v2.2.2
+      ORCHESTRATION: DOCKER-COMPOSE
+  mastermulticonnect1:
+    image: docker.whatsapp.biz/coreapp:v${WA_API_VERSION:-2.21.6}
+    restart: always
+    command: ["/opt/whatsapp/bin/wait_on_mysql.sh", "/opt/whatsapp/bin/launch_within_docker.sh"]
+    ports:
+      - "6250:6250"
+      - "6251:6251"
+      - "6252:6252"
+      - "6253:6253"
+    volumes:
+      - whatsappmediamulticonnect:/usr/local/wamedia
+    env_file:
+      - db.env
+    environment:
+      WA_APP_MULTICONNECT: "1"
+      WA_MASTER_NODE: "1"
+      # Represents external ports of this service (master)
+      # Naming is due to legacy reasons
+      COREAPP_EXTERNAL_PORTS: "6250,6251,6252,6253"
+      # Represents hostname of the current machine where this service (master) is hosted on
+      # Naming is due to legacy reasons
+      # $EXTERNAL_HOSTNAME should reflect the current machine's hostname
+      # accessible to other containers
+      COREAPP_HOSTNAME: "master-multiconnect-1"
+      # this is the version of the docker templates being used to run WhatsApp Business API
+      WA_RUNNING_ENV_VERSION: v2.2.2
+      ORCHESTRATION: DOCKER-COMPOSE
+  wacoremulticonnect2:
+    image: docker.whatsapp.biz/coreapp:v${WA_API_VERSION:-2.21.6}
+    restart: always
+    command: ["/opt/whatsapp/bin/wait_on_mysql.sh", "/opt/whatsapp/bin/launch_within_docker.sh"]
+    ports:
+      - "6250:6250"
+      - "6251:6251"
+      - "6252:6252"
+      - "6253:6253"
+    volumes:
+      - whatsappmediamulticonnect:/usr/local/wamedia
+    env_file:
+      - db.env
+    environment:
+      WA_APP_MULTICONNECT: "1"
+      # Needs to reflect ports exposed above
+      COREAPP_EXTERNAL_PORTS: "6250,6251,6252,6253"
+      # $EXTERNAL_HOSTNAME should reflect the current machine's hostname
+      # accessible to other containers
+      COREAPP_HOSTNAME: "wacore-multiconnect-2"
+      # This is the version of the docker templates being used to run WhatsApp Business API
+      WA_RUNNING_ENV_VERSION: v2.2.2
+      ORCHESTRATION: DOCKER-COMPOSE
+  mastermulticonnect2:
+    image: docker.whatsapp.biz/coreapp:v${WA_API_VERSION:-2.21.6}
+    restart: always
+    command: ["/opt/whatsapp/bin/wait_on_mysql.sh", "/opt/whatsapp/bin/launch_within_docker.sh"]
+    ports:
+      - "6250:6250"
+      - "6251:6251"
+      - "6252:6252"
+      - "6253:6253"
+    volumes:
+      - whatsappmediamulticonnect:/usr/local/wamedia
+    env_file:
+      - db.env
+    environment:
+      WA_APP_MULTICONNECT: "1"
+      WA_MASTER_NODE: "1"
+      # Represents external ports of this service (master)
+      # Naming is due to legacy reasons
+      COREAPP_EXTERNAL_PORTS: "6250,6251,6252,6253"
+      # Represents hostname of the current machine where this service (master) is hosted on
+      # Naming is due to legacy reasons
+      # $EXTERNAL_HOSTNAME should reflect the current machine's hostname
+      # accessible to other containers
+      COREAPP_HOSTNAME: "master-multiconnect-2"
+      # this is the version of the docker templates being used to run WhatsApp Business API
+      WA_RUNNING_ENV_VERSION: v2.2.2
+      ORCHESTRATION: DOCKER-COMPOSE

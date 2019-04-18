@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  annotations:
+    kompose.cmd: C:\oc\v3.11.0\kompose.exe convert -f prod-multiconnect-compose.yml
+      --provider openshift
+    kompose.version: 1.17.0 (a74acad)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: wawebmulticonnect
+  name: wawebmulticonnect
+spec:
+  replicas: 1
+  selector:
+    io.kompose.service: wawebmulticonnect
+  strategy:
+    resources: {}
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: wawebmulticonnect
+    spec:
+      serviceAccountName: chatbot-sa
+      containers:
+      - args:
+        - /opt/whatsapp/bin/wait_on_mysql.sh
+        - /opt/whatsapp/bin/launch_within_docker.sh
+        env:
+        - name: ORCHESTRATION
+          value: DOCKER-COMPOSE
+        - name: WA_APP_MULTICONNECT
+          value: "1"
+        - name: WA_DB_ENGINE
+          valueFrom:
+            configMapKeyRef:
+              key: WA_DB_ENGINE
+              name: wawebmulticonnect-db-env
+        - name: WA_DB_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              key: WA_DB_HOSTNAME
+              name: wawebmulticonnect-db-env
+        - name: WA_DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: WA_DB_PASSWORD
+              name: wawebmulticonnect-db-env
+        - name: WA_DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: WA_DB_PORT
+              name: wawebmulticonnect-db-env
+        - name: WA_DB_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              key: WA_DB_USERNAME
+              name: wawebmulticonnect-db-env
+        - name: WA_RUNNING_ENV_VERSION
+          value: v2.2.2
+        - name: WEBAPP_EXTERNAL_PORTS
+          value: "9090"
+        - name: WEBAPP_HOSTNAME
+          value: waweb-multiconnect
+        image: ' '
+        name: wawebmulticonnect
+        ports:
+        - containerPort: 443
+        resources: {}
+        volumeMounts:
+        - mountPath: /usr/local/wamedia
+          name: whatsappmediamulticonnect
+      restartPolicy: Always
+      volumes:
+      - name: whatsappmediamulticonnect
+        persistentVolumeClaim:
+          claimName: whatsappmediamulticonnect
+  test: false
+  triggers:
+  - type: ConfigChange
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - wawebmulticonnect
+      from:
+        kind: ImageStreamTag
+        name: wawebmulticonnect:v2.21.6
+    type: ImageChange
+status: {}

@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: DeploymentConfig
+metadata:
+  annotations:
+    kompose.cmd: C:\oc\v3.11.0\kompose.exe convert -f prod-multiconnect-compose.yml
+      --provider openshift
+    kompose.version: 1.17.0 (a74acad)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mastermulticonnect2
+  name: mastermulticonnect2
+spec:
+  replicas: 1
+  selector:
+    io.kompose.service: mastermulticonnect2
+  strategy:
+    resources: {}
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: mastermulticonnect2
+    spec:
+      serviceAccountName: chatbot-sa
+      containers:
+      - args:
+        - /opt/whatsapp/bin/wait_on_mysql.sh
+        - /opt/whatsapp/bin/launch_within_docker.sh
+        env:
+        - name: COREAPP_EXTERNAL_PORTS
+          value: "6250,6251,6252,6253"
+        - name: COREAPP_HOSTNAME
+          value: mastermulticonnect2
+        - name: ORCHESTRATION
+          value: DOCKER-COMPOSE
+        - name: WA_APP_MULTICONNECT
+          value: "1"
+        - name: WA_DB_ENGINE
+          valueFrom:
+            configMapKeyRef:
+              key: WA_DB_ENGINE
+              name: mastermulticonnect2-db-env
+        - name: WA_DB_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              key: WA_DB_HOSTNAME
+              name: mastermulticonnect2-db-env
+        - name: WA_DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: WA_DB_PASSWORD
+              name: mastermulticonnect2-db-env
+        - name: WA_DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: WA_DB_PORT
+              name: mastermulticonnect2-db-env
+        - name: WA_DB_USERNAME
+          valueFrom:
+            configMapKeyRef:
+              key: WA_DB_USERNAME
+              name: mastermulticonnect2-db-env
+        - name: WA_MASTER_NODE
+          value: "1"
+        - name: WA_RUNNING_ENV_VERSION
+          value: v2.2.2
+        image: ' '
+        name: mastermulticonnect2
+        ports:
+        - containerPort: 6250
+        - containerPort: 6251
+        - containerPort: 6252
+        - containerPort: 6253
+        resources: {}
+        volumeMounts:
+        - mountPath: /usr/local/wamedia
+          name: whatsappmediamulticonnect
+      restartPolicy: Always
+      volumes:
+      - name: whatsappmediamulticonnect
+        persistentVolumeClaim:
+          claimName: whatsappmediamulticonnect
+  test: false
+  triggers:
+  - type: ConfigChange
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - mastermulticonnect2
+      from:
+        kind: ImageStreamTag
+        name: mastermulticonnect2:v2.21.6
+    type: ImageChange
+status: {}

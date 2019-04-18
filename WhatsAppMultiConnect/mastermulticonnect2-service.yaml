@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: C:\oc\v3.11.0\kompose.exe convert -f prod-multiconnect-compose.yml
+      --provider openshift
+    kompose.version: 1.17.0 (a74acad)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: mastermulticonnect2
+  name: mastermulticonnect2
+spec:
+  ports:
+  - name: "6250"
+    port: 6250
+    targetPort: 6250
+  - name: "6251"
+    port: 6251
+    targetPort: 6251
+  - name: "6252"
+    port: 6252
+    targetPort: 6252
+  - name: "6253"
+    port: 6253
+    targetPort: 6253
+  selector:
+    io.kompose.service: mastermulticonnect2
+status:
+  loadBalancer: {}
